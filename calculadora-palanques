@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Palanques</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
+        .container { max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; background: #f9f9f9; }
+        input, select, button { margin: 10px; padding: 10px; width: 90%; }
+        h1 { color: #2c3e50; }
+        canvas { border: 1px solid #333; margin-top: 20px; width: 100%; max-width: 500px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Calculadora de Palanques</h1>
+
+        <label for="tipusPalanca">Selecciona el tipus de palanca:</label>
+        <select id="tipusPalanca" onchange="dibuixarPalanca()">
+            <option value="1">1r gènere (fulcre al centre)</option>
+            <option value="2">2n gènere (resistència al centre)</option>
+            <option value="3">3r gènere (força al centre)</option>
+        </select>
+
+        <label for="forca">Força aplicada (N):</label>
+        <input type="number" id="forca" placeholder="Introdueix la força" oninput="dibuixarPalanca()">
+
+        <label for="distanciaForca">Distància de la força al fulcre (m):</label>
+        <input type="number" id="distanciaForca" placeholder="Distància força" oninput="dibuixarPalanca()">
+
+        <label for="resistencia">Resistència (N):</label>
+        <input type="number" id="resistencia" placeholder="Introdueix la resistència" oninput="dibuixarPalanca()">
+
+        <label for="distanciaResistencia">Distància de la resistència al fulcre (m):</label>
+        <input type="number" id="distanciaResistencia" placeholder="Distància resistència" oninput="dibuixarPalanca()">
+
+        <button onclick="calcular()">Calcular</button>
+
+        <h2>Resultats</h2>
+        <p id="resultatMoment"></p>
+        <p id="resultatAM"></p>
+
+        <h2>Esquema de la palanca</h2>
+        <canvas id="croquisPalanca" width="500" height="200"></canvas>
+    </div>
+
+    <script>
+        function calcular() {
+            var F = parseFloat(document.getElementById('forca').value) || 0;
+            var d_F = parseFloat(document.getElementById('distanciaForca').value) || 0;
+            var R = parseFloat(document.getElementById('resistencia').value) || 0;
+            var d_R = parseFloat(document.getElementById('distanciaResistencia').value) || 0;
+
+            if (F > 0 && d_F > 0 && R > 0 && d_R > 0) {
+                var momentForca = F * d_F;
+                var momentResistencia = R * d_R;
+                var avantatgeMecanic = d_F / d_R;
+
+                document.getElementById('resultatMoment').innerText = 
+                    `Moment de la força: ${momentForca.toFixed(2)} Nm, Moment de la resistència: ${momentResistencia.toFixed(2)} Nm`;
+
+                document.getElementById('resultatAM').innerText = 
+                    `Avantatge mecànic: ${avantatgeMecanic.toFixed(2)} (sense unitats)`;
+            } else {
+                alert("Introdueix valors vàlids per fer el càlcul.");
+            }
+        }
+
+        function dibuixarPalanca() {
+            var canvas = document.getElementById('croquisPalanca');
+            var ctx = canvas.getContext('2d');
+            var tipus = document.getElementById('tipusPalanca').value;
+
+            var d_F = parseFloat(document.getElementById('distanciaForca').value) || 100;
+            var d_R = parseFloat(document.getElementById('distanciaResistencia').value) || 100;
+            var F = parseFloat(document.getElementById('forca').value) || 0;
+            var R = parseFloat(document.getElementById('resistencia').value) || 0;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Dibuixa la palanca
+            ctx.beginPath();
+            ctx.moveTo(50, 100);
+            ctx.lineTo(450, 100);
+            ctx.stroke();
+
+            // Posicions base
+            let fulcrePos = 250;
+            let forcaPos = 70;
+            let resistenciaPos = 430;
+
+            if (tipus == "1") {
+                forcaPos = fulcrePos - d_F;
+                resistenciaPos = fulcrePos + d_R;
+            } else if (tipus == "2") {
+                resistenciaPos = fulcrePos;
+                forcaPos = fulcrePos - d_F;
+            } else if (tipus == "3") {
+                forcaPos = fulcrePos;
+                resistenciaPos = fulcrePos + d_R;
+            }
+
+            // Dibuixa el fulcre
+            ctx.beginPath();
+            ctx.moveTo(fulcrePos, 100);
+            ctx.lineTo(fulcrePos - 20, 130);
+            ctx.lineTo(fulcrePos + 20, 130);
+            ctx.closePath();
+            ctx.fillStyle = "black";
+            ctx.fill();
+
+            // Dibuixa la força
+            ctx.fillStyle = "blue";
+            ctx.fillText(`F (${F}N)`, forcaPos, 70);
+            ctx.beginPath();
+            ctx.moveTo(forcaPos, 90);
+            ctx.lineTo(forcaPos, 100);
+            ctx.stroke();
+
+            // Dibuixa la resistència
+            ctx.fillStyle = "red";
+            ctx.fillText(`R (${R}N)`, resistenciaPos, 70);
+            ctx.beginPath();
+            ctx.moveTo(resistenciaPos, 90);
+            ctx.lineTo(resistenciaPos, 100);
+            ctx.stroke();
+        }
+
+        // Dibuixar croquis inicial
+        dibuixarPalanca();
+    </script>
+
+</body>
+</html>
